@@ -1,0 +1,32 @@
+﻿
+<MudForm @ref="_form">
+    <MudStack Spacing="3">
+        <MudText Typo="Typo.h5" Color="Color.Info" Style="font-family:'Agency FB'">@Title</MudText>
+
+        <MudTextField @bind-Value="@User.Username" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Username" Style="border-radius:5px" Required></MudTextField>
+
+        <MudTextField @bind-Value="@User.Password" Variant="Variant.Outlined" Margin="Margin.Dense" Label="Password" Style="border-radius:5px" Required></MudTextField>
+
+    </MudStack>
+</MudForm>
+<MudButton Variant="Variant.Outlined" Color="Color.Info" Class="justify-content-end" OnClick="Login" StartIcon="@Icons.Material.Filled.Login">Login</MudButton>
+
+@code {
+    [Parameter]
+    public UsersM User { get; set; }
+
+    [Parameter]
+    public string Title { get; set; }
+
+    MudForm _form = new();
+
+    async void Login()
+    {
+        bool res = await _auth.Login(User);
+
+        if (res == true)
+            Navigate.NavigateTo("/", true, false);
+        else
+            Navigate.NavigateTo("/Login");
+    }
+}

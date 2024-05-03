@@ -1,0 +1,123 @@
+﻿
+<MudGrid>
+    <MudItem xs="12" md="12">
+        <MudPaper>
+
+            <MudText Align="Align.Center" Typo="Typo.h6" Color="Color.Info">@(task != null ? "Add Task" : $"Update Task {task.TaskName}")</MudText>
+            <MudStack Class="m-2 pa-2">
+
+                <MudTextField @bind-Value="task.TaskName" Variant="Variant.Outlined" Label="Task Name" Margin="Margin.Dense"></MudTextField>
+
+                <MudTextField @bind-Value="task.Type" Variant="Variant.Outlined" Label="Task Type" Margin="Margin.Dense"></MudTextField>
+
+                <MudTextField @bind-Value="task.Details" Variant="Variant.Outlined" Label="Task Details" Lines="2" Margin="Margin.Dense"></MudTextField>
+
+                @if (task.child != null)
+                {
+                    <MudDataGrid Items="task.child" T="ProjectTaskM" Dense Bordered Height="150">
+                        <Columns>
+                            <TemplateColumn Title="Sr No." Context="dt">
+                                <CellTemplate>
+                                    @(task.child.ToList().IndexOf(dt.Item) + 1)
+                                </CellTemplate>
+                            </TemplateColumn>
+                            <PropertyColumn Property="x=> x.TaskName" Title="Name" Context="dt">
+                                <CellTemplate>
+                                    <MudTextField @bind-Value="dt.Item.TaskName" Label="Name" Margin="Margin.Dense" Variant="Variant.Outlined"></MudTextField>
+                                </CellTemplate>
+                            </PropertyColumn>
+                            <PropertyColumn Property="x=> x.Type" Title="Type" Context="dt">
+                                <CellTemplate>
+                                    <MudTextField @bind-Value="dt.Item.Type" Label="Type" Margin="Margin.Dense" Variant="Variant.Outlined"></MudTextField>
+                                </CellTemplate>
+                            </PropertyColumn>
+                            <PropertyColumn Property="x=> x.Details" Title="Details" Context="dt">
+                                <CellTemplate>
+                                    <MudTextField @bind-Value="dt.Item.Details" Label="Details" Lines="2" Margin="Margin.Dense" Variant="Variant.Outlined"></MudTextField>
+                                </CellTemplate>
+                            </PropertyColumn>
+                            <PropertyColumn Property="x=> x.Status" Title="Remove" Context="dt">
+                                <CellTemplate>
+                                    <MudFab Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="@(()=> task.child.Remove(dt.Item))" />
+                                </CellTemplate>
+                            </PropertyColumn>
+                        </Columns>
+                    </MudDataGrid>
+                }
+
+                <MudItem xs="12" md="6">
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Submit">Submit</MudButton>
+                    <MudButton Variant="Variant.Filled" Class="pa-2" Color="Color.Success" OnClick="@(()=> task.child.Add(new ProjectTaskM()))">Add SubTask</MudButton>
+                </MudItem>
+
+            </MudStack>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+
+    [CascadingParameter]
+    public DrawerModel isDrawerOpen { get; set; }
+
+    [Parameter]
+    public ProjectTaskM task { get; set; }
+
+    [Parameter]
+    public ProjectMasterM Master { get; set; }
+
+    public List<ProjectTaskM> Tasks = new();
+    public List<ProjectTaskM> Childtask = new();
+    // public ProjectTaskM task = new();
+
+    MudListItem SelectedValue = new();
+
+    private async void Submit()
+    {
+        if (!task.Id.Equals(Guid.Empty))
+        {
+            task.UpdatedBy = "Admin";
+
+            if (task.child != null)
+            {
+                foreach (var dt in task.child)
+                {
+                    if (dt.Id == Guid.Empty)
+                    {
+                        dt.ParentId = task.Id;
+                        dt.ProjectID = Master.Id;
+                        dt.CreatedBy = "Admin";
+                    }
+                    else
+                    dt.UpdatedBy = "Admin";
+                }
+            }
+        }
+        else
+        {
+            task.CreatedBy = "Admin";
+            task.Id = Guid.NewGuid();
+            task.ProjectID = Master.Id;
+            if (task.child != null)
+            {
+                foreach (var dt in task.child)
+                {
+                    dt.Id = Guid.NewGuid();
+                    dt.ParentId = task.Id;
+                    dt.ProjectID = Master.Id;
+                    dt.CreatedBy = "Admin";
+                }
+            }
+        }
+
+        foreach (var val in task.child)
+        {
+            var res = await _http.Post<string>("ProjectTask", val);
+        }
+        if (await _notify.Message(await _http.Post<string>("ProjectTask", task)))
+        {
+            isDrawerOpen.isOpen = false;
+            isDrawerOpen.ValueChanged.Invoke();
+        }
+    }
+}

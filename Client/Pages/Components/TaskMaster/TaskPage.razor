@@ -1,0 +1,143 @@
+﻿@page "/TaskPage/{MasterId}"
+
+<MudCard Style="border-radius:10px">
+    <MudCardHeader>
+        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Variant="Variant.Filled" Href="/ProjectDetails" />
+        <MudText Typo="Typo.h6" Class="m-2 pa-2" Color="Color.Info">Task's Under The Project @Master.Name</MudText>
+        <MudSpacer />
+        <MudFab Class="rounded-0" Color="Color.Info" Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="@(()=> AddTask(task=new()))"></MudFab>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudGrid>
+            <MudItem xs="12" md="8">
+
+                <MudTreeView Items="TreView" Hover="true" Width="100%" Color="Color.Info" @bind-SelectedValue="Selectedtask">
+                    <ItemTemplate Context="item">
+                        <MudTreeViewItem Items="@item.child" Value="item" Icon="@Icons.Material.Filled.TaskAlt" IconColor="@(item.CompletedOn == null? Color.Warning: Color.Success)">
+                            <BodyContent>
+                                <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; width: 100%">
+                                    <MudText Style="justify-self: start;">@item.TaskName</MudText>
+                                    <div style="justify-self: end;">
+                                        <MudChip Size="Size.Small">@($"Subtask :{item.child.Count()}") </MudChip>
+                                        <MudIconButton Variant="Variant.Filled" Style="border-radius:15px" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Success" OnClick="@(()=> Edit(item))" />
+                                        <MudIconButton Variant="Variant.Filled" Style="border-radius:15px" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="@(()=> Delete(item))" />
+                                    </div>
+                                </div>
+                            </BodyContent>
+                        </MudTreeViewItem>
+                    </ItemTemplate>
+                </MudTreeView>
+
+            </MudItem>
+
+            <MudItem xs="12" md="4">
+                @if (Selectedtask != null)
+                {
+                    <MudCard Elevation="4" Outlined Style="border-radius:15px">
+                        <MudCardHeader>
+                            <MudText Typo="Typo.subtitle1" Color="Color.Info">Task Details</MudText>
+                            <MudSpacer />
+                            <MudFab Class="m-1" Label="Edit" Style="font-size:small" Icon="@Icons.Material.Filled.Edit" IconSize="Size.Small" Size="Size.Small" Color="Color.Success" OnClick="@(()=> Edit(Selectedtask))" />
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudGrid Spacing="1">
+                                <MudItem xs="6" md="6">
+                                    <MudText Typo="Typo.subtitle2"><b>Task Name : </b> @Selectedtask.TaskName</MudText>
+                                </MudItem>
+                                <MudItem xs="6" md="6">
+                                    <MudText Typo="Typo.subtitle2"><b>Task Type : </b> @Selectedtask.Type</MudText>
+                                </MudItem> 
+                                <MudItem xs="12" md="12">
+                                    <MudText Typo="Typo.subtitle2"><b>Task Details : </b> @Selectedtask.Details</MudText>
+                                </MudItem> 
+                                <MudItem xs="12" md="12">
+                                    <MudText Typo="Typo.subtitle2"><b>Toal SubTasks : </b> @Selectedtask.child.Count()</MudText>
+                                </MudItem>
+                                <MudItem xs="6" md="6">
+                                    <MudText Typo="Typo.subtitle2"><b>Created On : </b> @Selectedtask.CreatedOn</MudText>
+                                </MudItem>
+                                <MudItem xs="6" md="6">
+                                    <MudText Typo="Typo.subtitle2"><b>Completed On : </b> @Selectedtask.CompletedOn</MudText>
+                                </MudItem>
+                            </MudGrid>
+                        </MudCardContent>
+                    </MudCard>
+                }
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
+
+<ADrawer isDrawerOpen="_drm" Title="@(task.Id == Guid.Empty ? "Add Task": $"Update Task {task.TaskName}")">
+    <TaskForm Master="Master" task="task" />
+</ADrawer>
+
+@code {
+
+    [Parameter]
+    public string MasterId { get; set; }
+
+    DrawerModel _drm = new();
+
+    public ProjectMasterM Master = new();
+
+    public HashSet<ProjectTaskM> Tasks = new();
+    public HashSet<ProjectTaskM> TreView = new();
+    public List<ProjectTaskM> subtask = new();
+
+    public ProjectTaskM Selectedtask { get; set; }
+
+    public ProjectTaskM task = new();
+
+    public bool isExpand { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Master = await _http.Get<ProjectMasterM>($"ProjectMaster/{MasterId}");
+        Tasks = await _http.Get<HashSet<ProjectTaskM>>($"ProjectTask/{Master.Id}");
+
+        CreatTreeView();
+    }
+
+    private async void CreatTreeView()
+    {
+        foreach (var tsk in Tasks)
+        {
+            if (tsk.ParentId == null)
+            {
+                TreView.Add(tsk);
+                subtask = Tasks.Where(c => c.ParentId == tsk.Id).ToList();
+
+                if (subtask != null)
+                {
+                    foreach (var sub in subtask)
+                    {
+                        tsk.child.Add(sub);
+                    }
+                }
+            }
+        }
+    }
+
+    private void SelectValueChangedHandler(EventArgs tsk)
+    {
+        var seletedvalue = tsk;
+    }
+
+    private void Edit(ProjectTaskM tsk)
+    {
+        _drm.isOpen = true;
+        task = tsk;
+    }
+
+    private void AddTask(ProjectTaskM tsk)
+    {
+        _drm.isOpen = true;
+        task = tsk;
+    }
+
+    private void Delete(ProjectTaskM tsk)
+    {
+
+    }
+}

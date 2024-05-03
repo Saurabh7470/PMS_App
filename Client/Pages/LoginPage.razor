@@ -1,0 +1,77 @@
+﻿@page "/Login"
+@using Aon_PMS.Client.Pages.Components.Login
+
+<style>
+    .bounceIn {
+        opacity: 0;
+        animation-delay: 0.5s;
+        animation-duration: 0.5s;
+        animation-name: bounceIn;
+        animation-fill-mode: forwards;
+    }
+
+    .bounceOut {
+        animation-duration: 0.5s;
+        animation-name: bounceOut;
+        animation-fill-mode: forwards;
+    }
+</style>
+
+    <MudPaper Elevation="4" Class="mt-5 pa-2" Style="border-radius:15px">
+        <MudGrid Spacing="0">
+            <MudItem xs="12" md="6" lg="6">
+                <MudPaper Elevation="4" Style="border-radius:0px 5px 0px 5px" Height="100%">
+                    <MudCarousel TData="object" AutoCycle=true Style="height:500px" ShowBullets=false>
+                        <MudCarouselItem Color="Color.Primary" Transition="Transition.Custom" CustomTransitionEnter="bounceIn" CustomTransitionExit="bounceOut">
+                            <div class="d-flex" style="height:100%">
+                                <MudImage Src="Images/Task1.png" ObjectFit="ObjectFit.Fill" Alt="/" Fluid />
+                            </div>
+                        </MudCarouselItem>
+                        <MudCarouselItem Color="Color.Primary" Transition="Transition.Custom" CustomTransitionEnter="bounceIn" CustomTransitionExit="bounceOut">
+                            <div class="d-flex" style="height:100%">
+                                <MudImage Src="Images/Task2.png" ObjectFit="ObjectFit.Fill" Alt="/" Fluid />
+                            </div>
+                        </MudCarouselItem>
+                        <MudCarouselItem Color="Color.Primary" Transition="Transition.Custom" CustomTransitionEnter="bounceIn" CustomTransitionExit="bounceOut">
+                            <div class="d-flex" style="height:100%">
+                                <MudImage Src="Images/Task3.png" ObjectFit="ObjectFit.Fill" Alt="/" Fluid />
+                            </div>
+                        </MudCarouselItem>
+                    </MudCarousel>
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12" md="6" lg="6">
+                <MudCard>
+                    <MudCardHeader>
+                        <MudText Typo="Typo.h5" Style="font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif"><b>PMS System</b></MudText>
+                        <MudSpacer />
+                        @if (Signup != false)
+                        {
+                            <MudLink OnClick="@(()=> {Signup = false;})">Back To Login</MudLink>
+                        }
+                        else
+                        {
+                            <MudLink OnClick="@(()=> {Signup = true;})">Don't Have Account? SingUp</MudLink>
+                        }
+                    </MudCardHeader>
+                    <MudCardContent>
+                        @if (Signup == false)
+                        {
+                            <LoginForm User="User" Title="Login Here!" />
+                        }
+                        else
+                        {
+                            <SignupForm User="User" Title="Sign Up Here!" />
+                        }
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+
+@code {
+    public bool Signup = false;
+
+    public UsersM User = new();
+}

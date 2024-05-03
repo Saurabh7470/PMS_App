@@ -1,0 +1,55 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    @if (LogUser != null)
+    {
+        <MudAppBar Color="Color.Info" Dense Elevation="4">
+
+            <MudIconButton Icon="@(Open == false ? @Icons.Material.Filled.Menu: @Icons.Material.Filled.Close)" Color="Color.Inherit" OnClick="toggelDrawar" />
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="Logout" Color="Color.Inherit" />
+        </MudAppBar>
+        <MudDrawer @bind-Open="Open" Style="scrollbar-width:none" Elevation="2" Color="Color.Info">
+            <MudDrawerHeader Dense Style="background-color:white">
+                <MudText Align="Align.Center" Color="Color.Warning"> <MudIcon Icon="@Icons.Material.Filled.Computer" Color="Color.Warning" /> <br /> <b>Project Management</b></MudText>
+            </MudDrawerHeader>
+            <MudDrawerContainer>
+                <NavMenu />
+            </MudDrawerContainer>
+        </MudDrawer>
+    }
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-3">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+
+</MudLayout>
+
+@code {
+
+    bool Open = false;
+    UsersM LogUser = new();
+
+    void toggelDrawar()
+    {
+        Open = !Open;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        LogUser = await _auth.logUser();
+
+        if (LogUser == null)
+            Navigate.NavigateTo("/Login", false, true);
+    }
+
+    void Logout()
+    {
+
+    }
+}

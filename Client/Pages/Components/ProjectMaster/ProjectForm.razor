@@ -1,0 +1,64 @@
+﻿<MudContainer MaxWidth="MaxWidth.Large">
+    <MudCard>
+        <MudCardContent>
+            <MudForm>
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" md="12">
+                        <MudText Class="p-2" Typo="Typo.body1"><b>Project Details</b></MudText>
+                        <MudDivider DividerType="DividerType.FullWidth" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="project.Name" Margin="Margin.Dense" Variant="Variant.Outlined" Label="Project Name" Required />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="project.Type" Margin="Margin.Dense" Variant="Variant.Outlined" Label="Project Type" Required />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudDatePicker @bind-Date="project.Deadline" Editable=true Margin="Margin.Dense" DateFormat="dd/MM/yyyy" Variant="Variant.Outlined" Label="Project Deadline" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="project.Details" Margin="Margin.Dense" Variant="Variant.Outlined" Lines="4" Label="Project Details" Required HelperText="maximum Word Count Is 350." />
+                    </MudItem>
+                </MudGrid>
+            </MudForm>
+        </MudCardContent>
+        <MudCardActions Class="justify-content-end">
+            <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SaveData" Class="p-2 m-1">Save</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="Cancle" Class="p-2 m-1">Cancel</MudButton>
+        </MudCardActions>
+    </MudCard>
+</MudContainer>
+
+@code {
+    [CascadingParameter]
+    public DrawerModel isDrawerOpen { get; set; }
+
+    [Parameter]
+    public ProjectMasterM? project { get; set; }
+
+    public ProjectCollaboratorsM collaborator = new();
+    public ProjectTaskM Ptask = new();
+
+    async void SaveData()
+    {
+        if (project.Id == Guid.Empty)
+        {
+            project.CreatedBy = "Test";
+        }
+        else
+        {
+            project.UpdateBy = "Test";
+        }
+        if (await _notify.Message(await _http.Post<string>("ProjectMaster", project)))
+        {
+            isDrawerOpen.isOpen = false;
+            isDrawerOpen.ValueChanged.Invoke();
+        }
+    }
+
+    void Cancle()
+    {
+        isDrawerOpen.isOpen = false;
+        isDrawerOpen.ValueChanged.Invoke();
+    }
+}

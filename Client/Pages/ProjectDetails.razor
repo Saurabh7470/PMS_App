@@ -1,0 +1,120 @@
+﻿@page "/ProjectDetails"
+@using Aon_PMS.Client.Pages.Components.ProjectMaster
+@using Aon_PMS.Client.Pages.Components.TaskMaster
+
+<style>
+    .my-custom-class {
+        backdrop-filter: blur(10px);
+    }
+</style>
+
+<MudCard Style="border-radius:10px">
+    <MudCardHeader>
+        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" />
+        <MudText Class="p-2" Typo="Typo.h6"> <b>Projects Details</b></MudText>
+        <MudSpacer />
+        <MudFab Class="rounded-0" Color="Color.Info" Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="@(()=> AddDetails(project=new()))"></MudFab>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudDataGrid Items="projects" T="ProjectMasterM" Bordered Dense Filterable=false QuickFilter="_quickFilter" Height="150">
+            <ToolBarContent>
+                <MudText Typo="Typo.caption">Project's List</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <Columns>
+                <PropertyColumn Property="x=> x.Name" />
+                <PropertyColumn Property="x=> x.Type" />
+                <PropertyColumn Property="x=> x.Status" Title="Action">
+                    <CellTemplate>
+                        <MudTooltip Text="Edit">
+                            <MudIconButton Icon="@Icons.Material.Filled.ModeEdit" Size="Size.Medium" Color="Color.Success" OnClick="@(()=> AddDetails(context.Item))" />
+                        </MudTooltip>
+                        <MudTooltip Text="Collaborates">
+                            <MudIconButton Icon="@Icons.Material.Filled.Groups" Size="Size.Medium" Color="Color.Info" OnClick="@(()=> AddCollaboraters(context.Item))" />
+                        </MudTooltip>
+                        <MudTooltip Text="Add Task">
+                            <MudIconButton Icon="@Icons.Material.Filled.AddTask" Size="Size.Medium" Color="Color.Primary" OnClick="@(()=> AddTask(context.Item))" />
+                        </MudTooltip>
+                        <MudTooltip Text="Delete">
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Medium" Color="Color.Error" />
+                        </MudTooltip>
+                    </CellTemplate>
+                </PropertyColumn>
+            </Columns>
+            <PagerContent>
+
+            </PagerContent>
+        </MudDataGrid>
+    </MudCardContent>
+</MudCard>
+
+@if (!_task)
+{
+    <ADrawer isDrawerOpen="_Dw" Title="@(project.Id == Guid.Empty? "Create Project" : $"Update Project {project.Name}")">
+        <ProjectForm project="project" />
+    </ADrawer>
+}
+
+@code {
+    private string _searchString;
+    private bool _task;
+
+    public List<ProjectMasterM> projects = new();
+    public ProjectMasterM project = new();
+
+    public ProjectCollaboratorsM Collaborater = new();
+    public List<ProjectCollaboratorsM> Collaboraters = new();
+
+    public UsersM logUser = new();
+
+    public DrawerModel _Dw = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        projects = await _http.Get<List<ProjectMasterM>>("ProjectMaster");
+        logUser = await _auth.logUser();
+    }
+
+    private Func<ProjectMasterM, bool> _quickFilter => x =>
+    {
+        if (string.IsNullOrWhiteSpace(_searchString))
+            return true;
+
+        if (x.Name.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.Type.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        return false;
+    };
+
+    void AddDetails(ProjectMasterM master)
+    {
+        _task = false;
+        project = master;
+        _Dw.isOpen = true;
+    }
+
+    async void AddCollaboraters(ProjectMasterM colab)
+    {
+        var paramentet = new DialogParameters<Collaborators> { { x => x.project, colab}, {x=> x.logUser, logUser } };
+        var options = new DialogOptions { CloseButton = true, DisableBackdropClick = true, ClassBackground = "my-custom-class" };
+        var result = await Dialog.ShowAsync<Collaborators>("Add Collaboraters", paramentet, options);
+
+        if (!result.Result.IsCanceled)
+        {
+            StateHasChanged();
+        }
+
+    }
+
+    async void AddTask(ProjectMasterM master)
+    {
+        _task = true;
+        project = master;
+        Navigate.NavigateTo($"/TaskPage/{master.Id.ToString()}");
+    }
+}

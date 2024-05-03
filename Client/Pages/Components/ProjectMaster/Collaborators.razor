@@ -1,0 +1,90 @@
+﻿<MudDialog>
+    <DialogContent>
+        <MudStack Class="pa-3 m-3">
+            <MudText>Request Users To collaborate With Your Project.</MudText>
+
+            <MudForm @ref=form>
+                <MudAutocomplete Variant="Variant.Outlined" Margin="Margin.Dense" Dense T="UsersM" ValueChanged="@((args)=>SelectedUser(args))" Adornment="Adornment.End"
+                                 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Success" ToStringFunc="@(x=> x.name)" SearchFunc="@((x)=> SearchAsync(x))" Required>
+                </MudAutocomplete>
+            </MudForm>
+
+            @if (!colab.UserID.Equals(Guid.Empty))
+            {
+                <MudButton FullWidth Variant="Variant.Filled" Color="Color.Success" OnClick="AddCollaborater">Add User To Collaborater</MudButton>
+            }
+
+            @if (Colabs.Count > 0 )
+            {
+                @foreach (var data in Colabs)
+                {
+                    <MudField Variant="Variant.Outlined" Margin="Margin.Dense" Label="@(Users.Where(x=> x.Id == data.UserID).FirstOrDefault().name)" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.DeleteSweep" AdornmentColor="Color.Error"></MudField>
+                }
+            }
+        </MudStack>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance Muddialog { get; set; }
+
+    [Parameter]
+    public ProjectMasterM project { get; set; }
+
+    [Parameter]
+    public UsersM logUser { get; set; }
+
+    MudForm form = new();
+
+    public ProjectCollaboratorsM? colab = new();
+    public List<ProjectCollaboratorsM>? Colabs = new();
+
+    public List<UsersM> Users = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Colabs = await _http.Get<List<ProjectCollaboratorsM>>($"ProjectCollaborator/{project.Id}");
+        Users = await _http.Get<List<UsersM>>($"UserMaster");
+    }
+
+    private async Task<IEnumerable<UsersM>> SearchAsync(string value)
+    {
+        await Task.Delay(5);
+        if (string.IsNullOrEmpty(value))
+        {
+            return null;
+        }
+        return Users.Where(x => x.name.Contains(value, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void SelectedUser(UsersM data)
+    {
+        if (data is not null)
+        {
+            colab.UserID = data.Id;
+        }
+    }
+
+    private async void AddCollaborater()
+    {
+        await form.Validate();
+        if (form.IsValid)
+        {
+            if (colab.Id == Guid.Empty)
+            {
+                colab.ProjectID = project.Id;
+                colab.CreatedBy = logUser.Id.ToString();
+                if (await _notify.Message(await _http.Post<string>("ProjectCollaborator", colab)))
+                {
+                    Muddialog.Close(DialogResult.Ok(project));
+                    StateHasChanged();
+                }
+            }
+            else
+                notify.Add("USer iS Alredy Exist", Severity.Warning);
+        }
+        else
+            notify.Add("Please Select A user", Severity.Warning);
+    }
+}

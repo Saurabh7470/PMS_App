@@ -1,0 +1,150 @@
+﻿@page "/ViewTask/{ProjectId}"
+
+<MudCard Outlined Style="border-radius:15px">
+    <MudCardHeader>
+        <MudText Typo="Typo.h6">
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Href="/AssignedProject"></MudIconButton>
+            Total task In @Project.Name Project
+        </MudText>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTabs Outlined="true" Position="Position.Left" Rounded="true" Border="true" ApplyEffectsToContainer="true" Class="mt-8" PanelClass="pa-6">
+            @foreach (var tsk in PTasks)
+            {
+                <MudTabPanel Text="@tsk.TaskName">
+                    <MudCard Outlined Style="border-radius:20px" Elevation="4">
+                        <MudCardContent>
+                            <MudGrid Spacing="2">
+                                <MudItem xs="12" md="6">
+                                    <span>Task Name</span>
+                                    <MudText><b>@tsk.TaskName</b></MudText>
+                                </MudItem>
+
+                                <MudItem xs="12" md="6">
+                                    <span>Task Type</span>
+                                    <MudText><b>@tsk.Type</b></MudText>
+                                </MudItem>
+
+                                <MudItem xs="12" md="12">
+                                    <span>Task Details</span>
+                                    <MudText><b>@tsk.Details</b></MudText>
+                                </MudItem>
+
+                                <MudItem xs="12" md="6">
+                                    <span>SubTask</span>
+                                    <MudChip Size="Size.Small" Color="Color.Primary">@($"Total: {tsk.child.Count()}") </MudChip>
+                                </MudItem>
+
+                                <MudItem xs="12" md="6">
+                                    <span>Task Status</span>
+                                    <MudChip Size="Size.Small" Color="@(tsk.CompletedOn != null ? Color.Success : Color.Warning)">@(tsk.CompletedOn != null ? "Completed" : "Pending")</MudChip>
+                                </MudItem>
+                                @if (tsk.child.Count() > 0)
+                                {
+                                    <MudItem xs="12" md="12">
+                                        <span><b>Sub Tasks</b></span>
+                                        <MudGrid Spacing="1">
+                                            @foreach (var chi in tsk.child)
+                                            {
+                                                <MudItem xs="12" md="6">
+                                                    <MudStack Spacing="2" Class="pa-2">
+                                                        <MudButton Color="Color.Info" Variant="Variant.Filled" Style="border-radius:10px" OnClick="@(()=>{_expanded = !_expanded;})" StartIcon="@(_expanded != true? @Icons.Material.Filled.KeyboardArrowDown: @Icons.Material.Filled.KeyboardArrowUp)">@chi.TaskName</MudButton>
+                                                        <MudDivider />
+                                                        <MudCollapse Expanded="_expanded">
+                                                            <MudPaper Class="pa-2">
+                                                                <span><b>Details:</b></span>
+                                                                <MudText Typo="Typo.caption">@chi.Details</MudText>
+                                                            </MudPaper>
+                                                        </MudCollapse>
+                                                    </MudStack>
+                                                </MudItem>
+                                            }
+                                        </MudGrid>
+
+                                    </MudItem>
+                                }
+                            </MudGrid>
+                        </MudCardContent>
+                        <MudCardActions Class="justify-content-end">
+                            @if (tsk.AssignedTo == null)
+                            {
+                                <MudButton Color="Color.Info" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Done" OnClick="@(()=> Accept(tsk))">Accept</MudButton>
+                            }
+                        </MudCardActions>
+                    </MudCard>
+                </MudTabPanel>
+            }
+        </MudTabs>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    [Parameter]
+    public string ProjectId { get; set; }
+
+    public List<ProjectTaskM> ATasks = new();
+    public List<ProjectTaskM> PTasks = new();
+    public ProjectTaskM task = new();
+
+    UsersM user = new UsersM();
+
+    public ProjectMasterM Project = new();
+
+    public bool _expanded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Project = await _http.Get<ProjectMasterM>($"ProjectMaster/{ProjectId}");
+        ATasks = await _http.Get<List<ProjectTaskM>>($"ProjectTask/{ProjectId}");
+
+        GenrateTask();
+
+    }
+    void GenrateTask()
+    {
+        foreach (var tsk in ATasks)
+        {
+            if (tsk.ParentId == null)
+            {
+                PTasks.Add(tsk);
+                List<ProjectTaskM> tks = ATasks.Where(c => c.ParentId == tsk.Id).ToList();
+
+                if (tks != null)
+                {
+                    foreach (var sub in tks)
+                    {
+                        tsk.child.Add(sub);
+                    }
+                }
+            }
+        }
+    }
+
+    public async void Accept(ProjectTaskM tsk)
+    {
+        tsk.AssignedTo = user.Id;
+        tsk.AssignedOn = DateTime.Now;
+
+        if (tsk.child.Count <= 0)
+        {
+            if (await _notify.Message(await _http.Post<string>("ProjectTask", tsk)))
+            {
+                StateHasChanged();
+            }
+        }
+        else
+        {
+            foreach (var child in tsk.child)
+            {
+                child.AssignedTo = user.Id;
+                child.AssignedOn = DateTime.Now;
+
+                var res = await _http.Post<string>("ProjectTask", child);
+            }
+            if (await _notify.Message(await _http.Post<string>("ProjectTask", tsk)))
+            {
+                StateHasChanged();
+            }
+        }
+    }
+}
