@@ -1,39 +1,50 @@
 ﻿@page "/AssignedProject"
+@using Aon_PMS.Client.Pages.Components.CollaboraterAction
 
+@if (!_task)
+{
+    <MudCard Style="border-radius:10px">
+        <MudCardHeader>
+            <MudText Typo="Typo.h6" Color="Color.Info">Total Assigned Project</MudText>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudDataGrid T="ProjectMasterM" Items="Projects" Dense Bordered Height="150" QuickFilter="_quickFilter">
+                <ToolBarContent>
+                    <MudText Typo="Typo.caption"><b>Total Projects Under You.</b></MudText>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <Columns>
+                    <PropertyColumn Property="x=> x.Name" Title="Name" />
+                    <PropertyColumn Property="x=> x.Type" Title="Type" />
+                    <PropertyColumn Property="x=> x.Details" Title="Detals" />
+                    <PropertyColumn Property="x=> x.Deadline" Title="Deadline" />
+                    <PropertyColumn Property="x=> x.CreatedBy" Title="Created-By" />
+                    <PropertyColumn Property="x=> x.Status" Title="Task">
+                        <CellTemplate>
+                            <MudNavLink Icon="@Icons.Material.Filled.AddTask" IconColor="Color.Info" OnClick="@(()=> {_task = true; Project = context.Item;})">View</MudNavLink>
+                        </CellTemplate>
+                    </PropertyColumn>
+                </Columns>
+            </MudDataGrid>
+        </MudCardContent>
+    </MudCard>
 
-<MudCard Style="border-radius:10px">
-    <MudCardHeader>
-        <MudText Typo="Typo.h6" Color="Color.Info">Total Assigned Project</MudText>
-    </MudCardHeader>
-    <MudCardContent>
-        <MudDataGrid T="ProjectMasterM" Items="Projects" Dense Bordered Height="150" QuickFilter="_quickFilter">
-            <ToolBarContent>
-                <MudText Typo="Typo.caption"><b>Total Projects Under You.</b></MudText>
-                <MudSpacer />
-                <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-            </ToolBarContent>
-            <Columns>
-                <PropertyColumn Property="x=> x.Name" Title="Name"/>
-                <PropertyColumn Property="x=> x.Type" Title="Type"/>
-                <PropertyColumn Property="x=> x.Details" Title="Detals"/>
-                <PropertyColumn Property="x=> x.Deadline" Title="Deadline"/>
-                <PropertyColumn Property="x=> x.CreatedBy" Title="Created-By"/>
-                <PropertyColumn Property="x=> x.Status" Title="Task">
-                    <CellTemplate>
-                        <MudNavLink Icon="@Icons.Material.Filled.AddTask" OnClick="@(()=> tasks(context.Item))">View</MudNavLink>
-                    </CellTemplate>
-                </PropertyColumn>
-            </Columns>
-        </MudDataGrid>
-    </MudCardContent>
-</MudCard>
-
+}
+else
+{
+    <TaskView Project="Project" >
+        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" OnClick="@(()=> {_task = false;})"></MudIconButton>
+    </TaskView>
+}
 
 @code {
 
     List<ProjectMasterM> Projects = new();
     ProjectMasterM Project = new();
+
+    bool _task = false;
 
     DrawerModel _drm = new();
 
@@ -60,10 +71,4 @@
 
         return false;
     };
-
-    private void tasks(ProjectMasterM mst)
-    {
-        Project = mst;
-        Navigate.NavigateTo($"ViewTask/{Project.Id.ToString()}");
-    }
 }

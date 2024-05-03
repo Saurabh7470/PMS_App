@@ -62,5 +62,17 @@ namespace Aon_PMS.Server.Controllers
             _sql.postData("sp_ProjectMaster", @params);
             return Ok("Success");
         }
+
+        [HttpPost("DEL")]
+        public ActionResult<ProjectMasterM> DeletMaste(ProjectMasterM val) 
+        {
+            SqlParameter[] param =
+              {
+                new SqlParameter{ParameterName="@Type", Value="DEL"},
+                new SqlParameter{ParameterName="@Id", Value=val.Id},
+            };
+            _sql.postData("sp_ProjectMaster", param);
+            return Ok("Deleted");
+        }
     }
 }

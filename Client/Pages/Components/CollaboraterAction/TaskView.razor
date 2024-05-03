@@ -1,9 +1,8 @@
-﻿@page "/ViewTask/{ProjectId}"
-
+﻿
 <MudCard Outlined Style="border-radius:15px">
     <MudCardHeader>
         <MudText Typo="Typo.h6">
-            <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Href="/AssignedProject"></MudIconButton>
+            @ChildContent
             Total task In @Project.Name Project
         </MudText>
     </MudCardHeader>
@@ -80,23 +79,23 @@
 
 @code {
     [Parameter]
-    public string ProjectId { get; set; }
+    public ProjectMasterM Project { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
 
     public List<ProjectTaskM> ATasks = new();
     public List<ProjectTaskM> PTasks = new();
     public ProjectTaskM task = new();
 
-    UsersM user = new UsersM();
-
-    public ProjectMasterM Project = new();
+    public UsersM loguser = new();
 
     public bool _expanded = false;
 
     protected override async Task OnInitializedAsync()
     {
-        Project = await _http.Get<ProjectMasterM>($"ProjectMaster/{ProjectId}");
-        ATasks = await _http.Get<List<ProjectTaskM>>($"ProjectTask/{ProjectId}");
-
+        ATasks = await _http.Get<List<ProjectTaskM>>($"ProjectTask/{Project.Id}");
+        loguser = await _auth.logUser();
         GenrateTask();
 
     }
@@ -122,7 +121,7 @@
 
     public async void Accept(ProjectTaskM tsk)
     {
-        tsk.AssignedTo = user.Id;
+        tsk.AssignedTo = loguser.Id;
         tsk.AssignedOn = DateTime.Now;
 
         if (tsk.child.Count <= 0)
@@ -136,7 +135,7 @@
         {
             foreach (var child in tsk.child)
             {
-                child.AssignedTo = user.Id;
+                child.AssignedTo = loguser.Id;
                 child.AssignedOn = DateTime.Now;
 
                 var res = await _http.Post<string>("ProjectTask", child);

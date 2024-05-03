@@ -1,8 +1,7 @@
-﻿@page "/TaskPage/{MasterId}"
-
+﻿
 <MudCard Style="border-radius:10px">
     <MudCardHeader>
-        <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Variant="Variant.Filled" Href="/ProjectDetails" />
+        @ChildContent
         <MudText Typo="Typo.h6" Class="m-2 pa-2" Color="Color.Info">Task's Under The Project @Master.Name</MudText>
         <MudSpacer />
         <MudFab Class="rounded-0" Color="Color.Info" Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="@(()=> AddTask(task=new()))"></MudFab>
@@ -75,11 +74,11 @@
 @code {
 
     [Parameter]
-    public string MasterId { get; set; }
+    public ProjectMasterM Master { get; set; }
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
 
     DrawerModel _drm = new();
-
-    public ProjectMasterM Master = new();
 
     public HashSet<ProjectTaskM> Tasks = new();
     public HashSet<ProjectTaskM> TreView = new();
@@ -93,7 +92,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Master = await _http.Get<ProjectMasterM>($"ProjectMaster/{MasterId}");
         Tasks = await _http.Get<HashSet<ProjectTaskM>>($"ProjectTask/{Master.Id}");
 
         CreatTreeView();

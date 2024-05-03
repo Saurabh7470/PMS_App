@@ -1,0 +1,32 @@
+﻿
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="2">
+            <MudText Typo="Typo.h5" Align="Align.Center">Enter a Remark before proceed.</MudText>
+
+            <MudTextField @bind-Value="Remakr" Margin="Margin.Dense" Variant="Variant.Outlined" Label="Enter Remark" Lines="3"></MudTextField>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Success" FullWidth OnClick="Submit">Submit</MudButton>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter]
+    public ProjectTaskM tsk { get; set; }
+
+    [Parameter]
+    public string ActionType { get; set; }
+
+    [CascadingParameter]
+    public MudDialogInstance dialoginstence { get; set; }
+
+    public string Remakr { get; set; }
+
+    async void Submit()
+    {
+
+    }
+}

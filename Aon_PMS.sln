@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34622.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aon_PMS.Server", "Server\Aon_PMS.Server.csproj", "{51624062-514E-4F57-9D11-BE77A233E055}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aon_PMS.Server", "Server\Aon_PMS.Server.csproj", "{51624062-514E-4F57-9D11-BE77A233E055}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aon_PMS.Client", "Client\Aon_PMS.Client.csproj", "{36244A90-4E5D-4A9A-810F-847A52A4CA08}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aon_PMS.Client", "Client\Aon_PMS.Client.csproj", "{36244A90-4E5D-4A9A-810F-847A52A4CA08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aon_PMS.Shared", "Shared\Aon_PMS.Shared.csproj", "{C43E37D9-18A4-4BC5-9349-86D810CED31D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aon_PMS.Shared", "Shared\Aon_PMS.Shared.csproj", "{C43E37D9-18A4-4BC5-9349-86D810CED31D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
