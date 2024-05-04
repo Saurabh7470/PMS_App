@@ -19,7 +19,7 @@
             <PropertyColumn Property="x=> x.AssignedOn" Title="Assigned On" />
             <PropertyColumn Property="x=> x.Status" Title="Status">
                 <CellTemplate>
-                    @if(context.Item.CompletedRemark == null)
+                    @if (context.Item.CompletedRemark == null)
                     {
                         <MudChip Color="Color.Warning" Size="Size.Small">Pending</MudChip>
                     }
@@ -126,17 +126,17 @@
         Ptasks = await _http.Get<List<ProjectTaskM>>($"ProjectTask/SEL/{Loguser.Id}");
     }
 
-    private async void SubmitRemark(ProjectTaskM tsk , string str)
+    private async void SubmitRemark(ProjectTaskM tsk, string str)
     {
-        if(str != null)
+        if (str != null)
         {
             var option = new DialogOptions { CloseButton = true, DisableBackdropClick = true, ClassBackground = "my-custom-class" };
             var parameter = new DialogParameters<RemarkDialog> { { x => x.tsk, tsk }, { x => x.ActionType, str } };
             var result = await Dialog.ShowAsync<RemarkDialog>("Enter Remakr", parameter, option);
 
-            if (!result.Result.IsCanceled)
+            var res = await result.Result;
+            if (!res.Cancelled)
             {
-                Ptasks = await _http.Get<List<ProjectTaskM>>($"ProjectTask/SEL/{Loguser.Id}");
                 StateHasChanged();
             }
         }

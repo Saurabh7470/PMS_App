@@ -50,10 +50,14 @@
                                                         <MudButton Color="Color.Info" Variant="Variant.Filled" Style="border-radius:10px" OnClick="@(()=>{_expanded = !_expanded;})" StartIcon="@(_expanded != true? @Icons.Material.Filled.KeyboardArrowDown: @Icons.Material.Filled.KeyboardArrowUp)">@chi.TaskName</MudButton>
                                                         <MudDivider />
                                                         <MudCollapse Expanded="_expanded">
-                                                            <MudPaper Class="pa-2">
+                                                            <MudPaper Class="pa-2" Outlined>
                                                                 <span><b>Details:</b></span>
                                                                 <MudText Typo="Typo.caption">@chi.Details</MudText>
                                                             </MudPaper>
+                                                            @if (chi.AssignedOn == null)
+                                                            {
+                                                                <MudButton Class="m-1" Variant="Variant.Outlined" Color="Color.Info" OnClick="@(()=> Accept(chi))">Accept</MudButton>
+                                                            }
                                                         </MudCollapse>
                                                     </MudStack>
                                                 </MudItem>
@@ -71,7 +75,7 @@
                             }
                             else
                             {
-                                <MudText Typo="Typo.subtitle1"><b>Assinged To:</b> @Users.FirstOrDefault(x=> tsk.AssignedTo == x.Id).name</MudText>
+                                <MudText Typo="Typo.subtitle1"><b>Assinged To:</b> @Users.FirstOrDefault(x => tsk.AssignedTo == x.Id).name</MudText>
                             }
                         </MudCardActions>
                     </MudCard>

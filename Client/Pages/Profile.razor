@@ -1,5 +1,35 @@
 ﻿@page "/Profile"
 
-@code {
+<MudCard Elevation="4" Outlined Style="border-radius:15px">
+    <MudCardContent>
+        <MudGrid Class="m-2" Spacing="4">
+            <MudItem xs="12" md="4" lg="4">
+                <MudPaper Elevation="6" Height="250" Style="border-radius:20px">
+                    <MudStack Spacing="1" Class="m-3 pa-5" Justify="Justify.Center">
+                        <MudAvatar Variant="Variant.Filled" Size="Size.Large" Style="height:80px; width:80px" Color="Color.Info">
+                            @(!string.IsNullOrEmpty(CurrUser.name) ? CurrUser.name.First().ToString() : string.Empty)
+                        </MudAvatar>
+                        <MudText Typo="Typo.subtitle1"><b>@CurrUser.email</b></MudText>
+                        <MudText Typo="Typo.subtitle1"><b>@CurrUser.employeeCode</b></MudText>
 
+                        <MudButton Variant="Variant.Filled" Class="mt-4" Style="border-radius:25px" Color="Color.Warning" StartIcon="@Icons.Material.Filled.Edit">Edit</MudButton>
+                    </MudStack>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" md="4" lg="4">
+
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudCard>
+
+
+@code {
+    UsersM LogUser = new();
+    UsersM CurrUser = new();
+    protected override async Task OnInitializedAsync()
+    {
+        LogUser = await _auth.logUser();
+        CurrUser = await _http.Get<UsersM>($"UserMaster/SEL/{LogUser.Id}");
+    }
 }

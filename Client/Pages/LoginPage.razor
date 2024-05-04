@@ -17,7 +17,8 @@
     }
 </style>
 
-    <MudPaper Elevation="4" Class="mt-5 pa-2" Style="border-radius:15px">
+<MudPaper Elevation="4" Class="mt-5 pa-2" Style="border-radius:15px">
+    <MudPaper>
         <MudGrid Spacing="0">
             <MudItem xs="12" md="6" lg="6">
                 <MudPaper Elevation="4" Style="border-radius:0px 5px 0px 5px" Height="100%">
@@ -42,33 +43,32 @@
             </MudItem>
 
             <MudItem xs="12" md="6" lg="6">
-                <MudCard>
-                    <MudCardHeader>
-                        <MudText Typo="Typo.h5" Style="font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif"><b>PMS System</b></MudText>
-                        <MudSpacer />
-                        @if (Signup != false)
-                        {
-                            <MudLink OnClick="@(()=> {Signup = false;})">Back To Login</MudLink>
-                        }
-                        else
-                        {
-                            <MudLink OnClick="@(()=> {Signup = true;})">Don't Have Account? SingUp</MudLink>
-                        }
-                    </MudCardHeader>
-                    <MudCardContent>
-                        @if (Signup == false)
-                        {
-                            <LoginForm User="User" Title="Login Here!" />
-                        }
-                        else
-                        {
-                            <SignupForm User="User" Title="Sign Up Here!" />
-                        }
-                    </MudCardContent>
-                </MudCard>
+                <MudCardHeader>
+                    <MudText Typo="Typo.h5" Style="font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif"><b>PMS System</b></MudText>
+                    <MudSpacer />
+                    @if (Signup != false)
+                    {
+                        <MudLink OnClick="@(()=> {Signup = false;})">Back To Login</MudLink>
+                    }
+                    else
+                    {
+                        <MudLink OnClick="@(()=> {Signup = true;})">Don't Have Account? SingUp</MudLink>
+                    }
+                </MudCardHeader>
+                <MudCardContent>
+                    @if (Signup == false)
+                    {
+                        <LoginForm User="User" Title="Login Here!" />
+                    }
+                    else
+                    {
+                        <SignupForm User="User" Title="Sign Up Here!" />
+                    }
+                </MudCardContent>
             </MudItem>
         </MudGrid>
     </MudPaper>
+</MudPaper>
 
 @code {
     public bool Signup = false;

@@ -8,18 +8,18 @@
     @if (LogUser != null)
     {
         <MudAppBar Color="Color.Info" Dense Elevation="4">
-
             <MudIconButton Icon="@(Open == false ? @Icons.Material.Filled.Menu: @Icons.Material.Filled.Close)" Color="Color.Inherit" OnClick="toggelDrawar" />
             <MudSpacer />
             <MudIconButton Icon="@Icons.Material.Filled.Logout" OnClick="Logout" Color="Color.Inherit" />
         </MudAppBar>
-        <MudDrawer @bind-Open="Open" Style="scrollbar-width:none" Elevation="2" Color="Color.Info">
-            <MudDrawerHeader Dense Style="background-color:white">
+        <MudDrawer @bind-Open="Open" Style="scrollbar-width:none" Elevation="2">
+            <MudDrawerHeader Dense>
                 <MudText Align="Align.Center" Color="Color.Warning"> <MudIcon Icon="@Icons.Material.Filled.Computer" Color="Color.Warning" /> <br /> <b>Project Management</b></MudText>
             </MudDrawerHeader>
             <MudDrawerContainer>
                 <NavMenu />
             </MudDrawerContainer>
+            <MudNavLink Icon="@Icons.Material.Filled.Logout" OnClick="Logout">Logout</MudNavLink>
         </MudDrawer>
     }
     <MudMainContent>
@@ -48,8 +48,11 @@
             Navigate.NavigateTo("/Login", false, true);
     }
 
-    void Logout()
+    async void Logout()
     {
-
+        await _auth.Logout();
+        LogUser = null;
+        Navigate.NavigateTo("/Login");
+        StateHasChanged();
     }
 }

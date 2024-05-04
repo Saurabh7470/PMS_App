@@ -1,9 +1,106 @@
-﻿<h3>SignupForm</h3>
+﻿@using System.Text.RegularExpressions
 
+<MudForm @ref="_form">
+    <MudStack Spacing="2">
+        <MudText Typo="Typo.h5" Color="Color.Info">@Title</MudText>
+
+        <MudTextField @bind-Value="User.name" Variant="Variant.Outlined" Label="Name" Margin="Margin.Dense" Required></MudTextField>
+
+        <MudTextField @bind-Value="User.email" Variant="Variant.Outlined" Label="Email" Margin="Margin.Dense" Required Validation="ValidateEmail"></MudTextField>
+
+        <MudNumericField @bind-Value="User.contactNo" Variant="Variant.Outlined" Label="Contact No" Margin="Margin.Dense" HideSpinButtons MaxLength="10" Required Validation="Mob"></MudNumericField>
+
+        <MudTextField @bind-Value="User.employeeCode" Variant="Variant.Outlined" Label="Employee Code" Margin="Margin.Dense"></MudTextField>
+
+        <MudTextField @bind-Value="User.Password" InputType="@inputType" Variant="Variant.Outlined" Label="Password" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentIcon="@Adorment" OnAdornmentClick="Showpassward" Required></MudTextField>
+
+        <MudTextField @bind-Value="validatePassword" InputType="InputType.Password" Variant="Variant.Outlined" Label="Confirm Password" Validation="ConfirmPass" Margin="Margin.Dense" Required></MudTextField>
+    </MudStack>
+</MudForm>
+
+<MudButton Variant="Variant.Outlined" Class="mt-2" Color="Color.Info" StartIcon="@Icons.Material.Filled.AssignmentTurnedIn" OnClick="SignUp">SignUp</MudButton>
 @code {
+
     [Parameter]
     public UsersM User { get; set; }
 
     [Parameter]
     public string Title { get; set; }
+
+    string validatePassword;
+
+    bool isShow;
+    InputType inputType = InputType.Password;
+    string Adorment = @Icons.Material.Filled.Visibility;
+
+    MudForm _form = new();
+
+    void Showpassward()
+    {
+        @if (isShow)
+        {
+            isShow = false;
+            Adorment = Icons.Material.Filled.VisibilityOff;
+            inputType = InputType.Password;
+        }
+        else
+        {
+            isShow = true;
+            Adorment = Icons.Material.Filled.Visibility;
+            inputType = InputType.Text;
+        }
+    }
+
+    public string ValidateEmail(string email)
+    {
+        if (email != null)
+        {
+            Regex regex = new Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+            var Result = regex.IsMatch(email);
+            if (Result != true)
+                return "Invalid Email Address";
+        }
+        else
+            return "Please Enter Email Address";
+        return "";
+    }
+
+    public string Mob(string Val)
+    {
+        if (Val != null)
+        {
+            Regex regex = new Regex("^?[(]?[0-9]{3}[)]??[0-9]{3}[0-9]{4,6}$");
+            var Result = regex.IsMatch(Val);
+            if (Result != true)
+                return "Invalid Mobile Number";
+        }
+        else
+            return "Please Enter Mobile Number";
+        return "";
+    }
+
+    public string ConfirmPass(string conpass)
+    {
+        if (conpass != null && User.Password != null)
+        {
+            if (conpass != User.Password)
+                return "Error Passsword not match";
+        }
+        else
+            return "Please confirm Password";
+        return "";
+    }
+
+    public async void SignUp()
+    {
+        await _form.Validate();
+        if (_form.IsValid)
+        {
+            if(await _notify.Message(await _http.Post<string>("UserMaster/", User)))
+            {
+                await _form.ResetAsync();
+                StateHasChanged();
+            }
+        }
+    }
 }
