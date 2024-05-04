@@ -1,0 +1,144 @@
+﻿@page "/UserTask"
+@using Aon_PMS.Client.Pages.Components.CollaboraterAction
+
+<style>
+    .my-custom-class {
+        backdrop-filter: blur(10px);
+    }
+</style>
+
+<MudPaper>
+    <MudText Class="pa-2 m-2" Typo="Typo.body1"><b>Total Tasks</b></MudText>
+
+    <MudDataGrid Items="Ptasks" T="ProjectTaskM" Dense=true Hover=true Striped=true FixedHeader Height="150">
+        <Columns>
+            <HierarchyColumn />
+            <PropertyColumn Property="x=> x.TaskName" Title="Name" />
+            <PropertyColumn Property="x=> x.Type" Title="Type" />
+            <PropertyColumn Property="x=> x.Details" Title="Details" />
+            <PropertyColumn Property="x=> x.AssignedOn" Title="Assigned On" />
+            <PropertyColumn Property="x=> x.Status" Title="Status">
+                <CellTemplate>
+                    @if(context.Item.CompletedRemark == null)
+                    {
+                        <MudChip Color="Color.Warning" Size="Size.Small">Pending</MudChip>
+                    }
+                    else if (context.Item.UATRemark == null && context.Item.CompletedRemark != null)
+                    {
+                        <MudChip Color="Color.Warning" Size="Size.Small">UAT Pending</MudChip>
+                    }
+                    else if (context.Item.PublishRemark == null && context.Item.UATRemark != null && context.Item.CompletedRemark != null)
+                    {
+                        <MudChip Color="Color.Warning" Size="Size.Small">Publish Pending</MudChip>
+                    }
+                    else
+                    {
+                        <MudChip Color="Color.Success" Size="Size.Small">Completed</MudChip>
+                    }
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x=> x.Status" Title="Action">
+                <CellTemplate>
+                    @if (context.Item.CompletedRemark == null)
+                    {
+                        <MudButton Variant="Variant.Filled" Size="Size.Small" Color="Color.Success" Style="border-radius:10px" OnClick="@(()=> SubmitRemark(context.Item, "Complete"))">Complete</MudButton>
+                    }
+                    else if (context.Item.UATRemark == null && context.Item.CompletedRemark != null)
+                    {
+                        <MudButton Variant="Variant.Filled" Size="Size.Small" Color="Color.Success" Style="border-radius:10px" OnClick="@(()=> SubmitRemark(context.Item, "UAT"))">UAT Approve</MudButton>
+                    }
+                    else if (context.Item.PublishRemark == null && context.Item.UATRemark != null && context.Item.CompletedRemark != null)
+                    {
+                        <MudButton Variant="Variant.Filled" Size="Size.Small" Color="Color.Success" Style="border-radius:10px" OnClick="@(()=> SubmitRemark(context.Item, "Publish"))">Published</MudButton>
+                    }
+                    else
+                    {
+                        <MudChip Color="Color.Success" Size="Size.Small">Task Completed</MudChip>
+                    }
+                </CellTemplate>
+            </PropertyColumn>
+        </Columns>
+        <ChildRowContent>
+            <MudCard Elevation="4" Class="m-2" Outlined Square Style="border-radius:15px">
+                <MudCardHeader>
+                    <MudText Typo="Typo.body1" Color="Color.Success"><b>Task Status</b></MudText>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudTimeline TimelineAlign="TimelineAlign.Start" TimelineOrientation="TimelineOrientation.Vertical" DisableModifiers="false">
+                        <MudTimelineItem Size="Size.Small" Color="Color.Info">
+                            @if (context.Item.CompletedRemark != null)
+                            {
+                                <MudAlert Severity="Severity.Success">
+                                    <span>@context.Item.CompletedOn</span>
+                                    <MudText Typo="Typo.subtitle1">@context.Item.CompletedRemark</MudText>
+                                </MudAlert>
+                            }
+                            else
+                            {
+                                <MudAlert Severity="Severity.Warning">Pending.</MudAlert>
+                            }
+                        </MudTimelineItem>
+                        <MudTimelineItem Size="Size.Small" Color="Color.Info">
+                            @if (context.Item.UATRemark != null)
+                            {
+                                <MudAlert Severity="Severity.Success">
+                                    <span>@context.Item.UATOn</span>
+                                    <MudText Typo="Typo.subtitle1">@context.Item.UATRemark</MudText>
+                                </MudAlert>
+                            }
+                            else
+                            {
+                                <MudAlert Severity="Severity.Warning">Pending.</MudAlert>
+                            }
+                        </MudTimelineItem>
+                        <MudTimelineItem Size="Size.Small" Color="Color.Info">
+                            @if (context.Item.PublishRemark != null)
+                            {
+                                <MudAlert Severity="Severity.Success">
+                                    <span>@context.Item.PublishOn</span>
+                                    <MudText Typo="Typo.subtitle1">@context.Item.PublishRemark</MudText>
+                                </MudAlert>
+                            }
+                            else
+                            {
+                                <MudAlert Severity="Severity.Warning">Pending.</MudAlert>
+                            }
+                        </MudTimelineItem>
+                    </MudTimeline>
+                </MudCardContent>
+            </MudCard>
+        </ChildRowContent>
+        <PagerContent>
+            <MudDataGrid T="ProjectTaskM"></MudDataGrid>
+        </PagerContent>
+    </MudDataGrid>
+</MudPaper>
+
+
+@code {
+    public List<ProjectTaskM> Ptasks = new();
+
+    public UsersM Loguser = new();
+    protected override async Task OnInitializedAsync()
+    {
+        Loguser = await _auth.logUser();
+
+        Ptasks = await _http.Get<List<ProjectTaskM>>($"ProjectTask/SEL/{Loguser.Id}");
+    }
+
+    private async void SubmitRemark(ProjectTaskM tsk , string str)
+    {
+        if(str != null)
+        {
+            var option = new DialogOptions { CloseButton = true, DisableBackdropClick = true, ClassBackground = "my-custom-class" };
+            var parameter = new DialogParameters<RemarkDialog> { { x => x.tsk, tsk }, { x => x.ActionType, str } };
+            var result = await Dialog.ShowAsync<RemarkDialog>("Enter Remakr", parameter, option);
+
+            if (!result.Result.IsCanceled)
+            {
+                Ptasks = await _http.Get<List<ProjectTaskM>>($"ProjectTask/SEL/{Loguser.Id}");
+                StateHasChanged();
+            }
+        }
+    }
+}

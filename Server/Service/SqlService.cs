@@ -105,7 +105,7 @@ namespace Aon_PMS.Server.Services
                     });
                     var jsonResult = new StringBuilder();
                    // var jsonresult1 = jsonResult.Replace('n', ' ');
-                    var reader = cmd.ExecuteReader();
+                    var reader = cmd.ExecuteNonQuery();
                 }
             }
         }

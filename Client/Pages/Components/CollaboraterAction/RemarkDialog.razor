@@ -2,7 +2,7 @@
 <MudDialog>
     <DialogContent>
         <MudStack Spacing="2">
-            <MudText Typo="Typo.h5" Align="Align.Center">Enter a Remark before proceed.</MudText>
+            <MudText Typo="Typo.subtitle1" Align="Align.Center">Enter a Remark before proceed.</MudText>
 
             <MudTextField @bind-Value="Remakr" Margin="Margin.Dense" Variant="Variant.Outlined" Label="Enter Remark" Lines="3"></MudTextField>
 
@@ -23,10 +23,35 @@
     [CascadingParameter]
     public MudDialogInstance dialoginstence { get; set; }
 
-    public string Remakr { get; set; }
+    public string Remakr;
 
     async void Submit()
     {
+        if (ActionType == "Complete")
+        {
+            tsk.CompletedOn = DateTime.Now;
+            tsk.CompletedRemark = Remakr;
+        }
+        else if(ActionType == "UAT")
+        {
+            tsk.UATOn = DateTime.Now;
+            tsk.UATRemark = Remakr;
+        }
+        else if (ActionType == "Publish")
+        {
+            tsk.PublishOn = DateTime.Now;
+            tsk.PublishRemark = Remakr;
+        }
 
+        if (await _notify.Message( await _http.Post<string>("ProjectTask/ACT", tsk)))
+        {
+            dialoginstence.Close(DialogResult.Ok(tsk));
+            StateHasChanged();
+        }
+        else
+        {
+            dialoginstence.Close(DialogResult.Cancel());
+            await _notify.Message("Error Data Not saved");
+        }
     }
 }

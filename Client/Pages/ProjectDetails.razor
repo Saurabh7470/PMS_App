@@ -18,7 +18,7 @@
             <MudFab Class="rounded-0" Color="Color.Info" Icon="@Icons.Material.Filled.Add" Size="Size.Small" OnClick="@(()=> AddDetails(project=new()))"></MudFab>
         </MudCardHeader>
         <MudCardContent>
-            <MudDataGrid Items="projects" T="ProjectMasterM" Bordered Dense Filterable=false QuickFilter="_quickFilter" Height="150">
+            <MudDataGrid Items="projects" T="ProjectMasterM" Bordered Dense=true Striped=true Hover=true Filterable=false QuickFilter="_quickFilter" Height="150" FixedHeader>
                 <ToolBarContent>
                     <MudText Typo="Typo.caption">Project's List</MudText>
                     <MudSpacer />
@@ -46,7 +46,7 @@
                     </PropertyColumn>
                 </Columns>
                 <PagerContent>
-
+                    <MudDataGridPager T="ProjectMasterM" />
                 </PagerContent>
             </MudDataGrid>
         </MudCardContent>

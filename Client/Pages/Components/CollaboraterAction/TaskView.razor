@@ -69,6 +69,10 @@
                             {
                                 <MudButton Color="Color.Info" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Done" OnClick="@(()=> Accept(tsk))">Accept</MudButton>
                             }
+                            else
+                            {
+                                <MudText Typo="Typo.subtitle1"><b>Assinged To:</b> @Users.FirstOrDefault(x=> tsk.AssignedTo == x.Id).name</MudText>
+                            }
                         </MudCardActions>
                     </MudCard>
                 </MudTabPanel>
@@ -89,12 +93,14 @@
     public ProjectTaskM task = new();
 
     public UsersM loguser = new();
+    public List<UsersM> Users = new();
 
     public bool _expanded = false;
 
     protected override async Task OnInitializedAsync()
     {
         ATasks = await _http.Get<List<ProjectTaskM>>($"ProjectTask/{Project.Id}");
+        Users = await _http.Get<List<UsersM>>("UserMaster");
         loguser = await _auth.logUser();
         GenrateTask();
 
@@ -126,7 +132,7 @@
 
         if (tsk.child.Count <= 0)
         {
-            if (await _notify.Message(await _http.Post<string>("ProjectTask", tsk)))
+            if (await _notify.Message(await _http.Post<string>("ProjectTask/ACT", tsk)))
             {
                 StateHasChanged();
             }
@@ -138,9 +144,9 @@
                 child.AssignedTo = loguser.Id;
                 child.AssignedOn = DateTime.Now;
 
-                var res = await _http.Post<string>("ProjectTask", child);
+                var res = await _http.Post<string>("ProjectTask/ACT", child);
             }
-            if (await _notify.Message(await _http.Post<string>("ProjectTask", tsk)))
+            if (await _notify.Message(await _http.Post<string>("ProjectTask/ACT", tsk)))
             {
                 StateHasChanged();
             }

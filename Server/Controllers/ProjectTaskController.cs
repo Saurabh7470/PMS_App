@@ -31,14 +31,14 @@ namespace Aon_PMSs.Server.Controllers
         }
 
         [HttpGet("SEL/{ID}")]
-        public ActionResult<ProjectTaskM> SelectPorjectByID(Guid ID)
+        public ActionResult<IEnumerable<ProjectTaskM>> SelectPorjectByID(Guid ID)
         {
             SqlParameter[] @params =
             {
-                new SqlParameter{ParameterName="@Type",Direction=ParameterDirection.Input,Value="ALL"},
+                new SqlParameter{ParameterName="@Type",Direction=ParameterDirection.Input,Value="SEL"},
                 new SqlParameter{ParameterName="@id",Direction=ParameterDirection.Input,Value=ID},
             };
-            return _sql.getData<ProjectTaskM>("sp_projectTask", @params);
+            return _sql.getDatas<ProjectTaskM>("sp_projectTask", @params);
         }
 
         [HttpPost]
@@ -52,6 +52,23 @@ namespace Aon_PMSs.Server.Controllers
             };
             _sql.postData("sp_projectTask", @params);
             return Ok("Success");
+        }
+
+        [HttpPost("ACT")]
+        public ActionResult<IEnumerable<ProjectTaskM>> PostAction(ProjectTaskM value)
+        {
+            string json = JsonConvert.SerializeObject(value);
+            SqlParameter[] param =
+            {
+                new SqlParameter{ParameterName="@Type",Direction=ParameterDirection.Input, Value="ACT"},
+                new SqlParameter{ParameterName="@PostData",Direction=ParameterDirection.Input, Value=json},
+                new SqlParameter{ParameterName="@AssignedOn", Direction=ParameterDirection.Input, Value=value.AssignedOn},
+                new SqlParameter{ParameterName="@CompletedOn",Direction=ParameterDirection.Input, Value=value.CompletedOn},
+                new SqlParameter{ParameterName="@UATOn",Direction=ParameterDirection.Input, Value=value.UATOn},
+                new SqlParameter{ParameterName="@PublishOn",Direction= ParameterDirection.Input, Value=value.PublishOn},
+            };
+            _sql.postData("sp_projectTask", param);
+            return Ok("Action Saved.");
         }
     }
 }
