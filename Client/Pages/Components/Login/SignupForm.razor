@@ -2,7 +2,7 @@
 
 <MudForm @ref="_form">
     <MudStack Spacing="2">
-        <MudText Typo="Typo.h5" Color="Color.Info">@Title</MudText>
+        <MudText Typo="Typo.h5" Color="Color.Info" Style="font-family:'Agency FB'">@Title</MudText>
 
         <MudTextField @bind-Value="User.name" Variant="Variant.Outlined" Label="Name" Margin="Margin.Dense" Required></MudTextField>
 
@@ -12,13 +12,19 @@
 
         <MudTextField @bind-Value="User.employeeCode" Variant="Variant.Outlined" Label="Employee Code" Margin="Margin.Dense"></MudTextField>
 
-        <MudTextField @bind-Value="User.Password" InputType="@inputType" Variant="Variant.Outlined" Label="Password" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentIcon="@Adorment" OnAdornmentClick="Showpassward" Required></MudTextField>
-
-        <MudTextField @bind-Value="validatePassword" InputType="InputType.Password" Variant="Variant.Outlined" Label="Confirm Password" Validation="ConfirmPass" Margin="Margin.Dense" Required></MudTextField>
+        @if (User != null)
+        {
+            <MudTextField @bind-Value="NewPassword" Variant="Variant.Outlined" Label="Enter new Password" Margin="Margin.Dense" />
+        }
+        else
+        {
+            <MudTextField @bind-Value="User.Password" InputType="@inputType" Variant="Variant.Outlined" Label="Password" Margin="Margin.Dense" Adornment="Adornment.End" AdornmentIcon="@Adorment" OnAdornmentClick="Showpassward" Required="@(User!= null?false:true)"></MudTextField>
+        }
+        <MudTextField @bind-Value="validatePassword" InputType="InputType.Password" Variant="Variant.Outlined" Label="Confirm Password" Validation="ConfirmPass" Margin="Margin.Dense" Required="@(User!= null?false:true)"></MudTextField>
     </MudStack>
 </MudForm>
 
-<MudButton Variant="Variant.Outlined" Class="mt-2" Color="Color.Info" StartIcon="@Icons.Material.Filled.AssignmentTurnedIn" OnClick="SignUp">SignUp</MudButton>
+<MudButton Variant="Variant.Outlined" Class="mt-2" Color="Color.Info" StartIcon="@Icons.Material.Filled.AssignmentTurnedIn" OnClick="SignUp">@(User != null ? "Submit" : "SignUp")</MudButton>
 @code {
 
     [Parameter]
@@ -28,6 +34,7 @@
     public string Title { get; set; }
 
     string validatePassword;
+    string NewPassword;
 
     bool isShow;
     InputType inputType = InputType.Password;
@@ -83,10 +90,10 @@
     {
         if (conpass != null && User.Password != null)
         {
-            if (conpass != User.Password)
+            if (conpass != User.Password || conpass != NewPassword)
                 return "Error Passsword not match";
         }
-        else
+        else if (User == null && conpass == null)
             return "Please confirm Password";
         return "";
     }
@@ -96,9 +103,11 @@
         await _form.Validate();
         if (_form.IsValid)
         {
-            if(await _notify.Message(await _http.Post<string>("UserMaster/", User)))
+            if (await _notify.Message(await _http.Post<string>("UserMaster/", User)))
             {
-                await _form.ResetAsync();
+                if (User == null)
+                    await _form.ResetAsync();
+
                 StateHasChanged();
             }
         }

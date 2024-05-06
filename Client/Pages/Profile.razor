@@ -1,8 +1,9 @@
 ﻿@page "/Profile"
+@using Aon_PMS.Client.Pages.Components.Login
 
 <MudCard Elevation="4" Outlined Style="border-radius:15px">
     <MudCardContent>
-        <MudGrid Class="m-2" Spacing="4">
+        <MudGrid Spacing="4">
             <MudItem xs="12" md="4" lg="4">
                 <MudPaper Elevation="6" Height="250" Style="border-radius:20px">
                     <MudStack Spacing="1" Class="m-3 pa-5" Justify="Justify.Center">
@@ -12,12 +13,32 @@
                         <MudText Typo="Typo.subtitle1"><b>@CurrUser.email</b></MudText>
                         <MudText Typo="Typo.subtitle1"><b>@CurrUser.employeeCode</b></MudText>
 
-                        <MudButton Variant="Variant.Filled" Class="mt-4" Style="border-radius:25px" Color="Color.Warning" StartIcon="@Icons.Material.Filled.Edit">Edit</MudButton>
+                        <MudButton Variant="Variant.Filled" Class="mt-4" Style="border-radius:25px" Color="@(edit != true?Color.Warning:Color.Success)" StartIcon="@(edit!=true?@Icons.Material.Filled.Edit:@Icons.Material.Filled.DoneAll)" OnClick="@(()=> {edit = !edit;})">@(edit != true ? "Edit" : "Done")</MudButton>
                     </MudStack>
                 </MudPaper>
             </MudItem>
-            <MudItem xs="12" md="4" lg="4">
-
+            <MudItem xs="12" md="6" lg="6">
+                <MudCard Elevation="4" Style="border-radius:20px">
+                    <MudCardHeader>
+                        <MudText Typo="Typo.h5" Style="font-family:'Times New Roman', Times, serif"><MudIcon Icon="@Icons.Material.Filled.Details" Color="Color.Warning" /> <b>Details</b></MudText>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        @if (!edit)
+                        {
+                            <MudStack Reverse Class="m-3 pa-5" Justify="Justify.Center">
+                                <MudText Typo="Typo.subtitle1">Name : <b>@CurrUser.name</b></MudText>
+                                <MudText Typo="Typo.subtitle1">Employee Code : <b>@CurrUser.employeeCode</b></MudText>
+                                <MudText Typo="Typo.subtitle1">Username : <b>@CurrUser.Username</b></MudText>
+                                <MudText Typo="Typo.subtitle1">Contact : <b>@CurrUser.contactNo</b></MudText>
+                                <MudText Typo="Typo.subtitle1">Email : <b>@CurrUser.email</b></MudText>
+                            </MudStack>
+                        }
+                        else
+                        {
+                            <SignupForm Title="Edit Details" User="CurrUser"/>
+                        }
+                    </MudCardContent>
+                </MudCard>
             </MudItem>
         </MudGrid>
     </MudCardContent>
@@ -27,6 +48,7 @@
 @code {
     UsersM LogUser = new();
     UsersM CurrUser = new();
+    bool edit;
     protected override async Task OnInitializedAsync()
     {
         LogUser = await _auth.logUser();
