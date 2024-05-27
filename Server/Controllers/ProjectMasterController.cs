@@ -29,6 +29,16 @@ namespace Aon_PMS.Server.Controllers
             return _sql.getDatas<ProjectMasterM>("sp_ProjectMaster", @params);
         }
 
+        [HttpGet("SEL")]
+        public ActionResult<IEnumerable<ProjectMasterM>> ActiveProject()
+        {
+            SqlParameter[] @param =
+            {
+                new SqlParameter{ParameterName="@Type", Direction=ParameterDirection.Input,Value="SEL"},
+            };
+            return _sql.getDatas<ProjectMasterM>("sp_ProjectMaster", @param);
+        }
+
         [HttpGet("COL/{Collaborator}")]
         public ActionResult<IEnumerable<ProjectMasterM>> GetProjectsByCollaborator(Guid Collaborator)
         {

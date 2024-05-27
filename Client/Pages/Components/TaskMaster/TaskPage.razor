@@ -93,7 +93,7 @@
     protected override async Task OnInitializedAsync()
     {
         Tasks = await _http.Get<HashSet<ProjectTaskM>>($"ProjectTask/{Master.Id}");
-
+        _drm.ValueChanged += async () => { await OnInitializedAsync();StateHasChanged(); };
         CreatTreeView();
     }
 

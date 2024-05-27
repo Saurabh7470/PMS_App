@@ -41,6 +41,16 @@ namespace Aon_PMSs.Server.Controllers
             return _sql.getDatas<ProjectTaskM>("sp_projectTask", @params);
         }
 
+        [HttpGet("PEN")]
+        public ActionResult<IEnumerable<ProjectTaskM>> Pendingtask()
+        {
+            SqlParameter[] param =
+            {
+                new SqlParameter { ParameterName = "@Type", Value = "PEN", Direction = ParameterDirection.Input }
+            };
+            return _sql.getDatas<ProjectTaskM>("sp_projectTask", @param);
+        }
+
         [HttpPost]
         public ActionResult<IEnumerable<ProjectTaskM>> PostProjectTask(ProjectTaskM value)
         {
