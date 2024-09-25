@@ -1,4 +1,6 @@
-Project Management System
+Project Management System.
+
+
 Overview
 The Project Management System is a web application built using the .NET Blazor framework and MudBlazor for UI components. 
 It enables teams to manage and track their projects, tasks, deadlines, and collaborate effectively. 
