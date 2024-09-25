@@ -22,7 +22,10 @@ Backend: .NET Core API
 Database: SQL Server (or any other DBMS)
 ORM: Dapper (or Entity Framework, if used)
 Authentication: JWT-based Authentication (if implemented)
+
 Installation
+
+
 Prerequisites
 Ensure you have the following installed:
 .NET SDK (version 6.0 or later)
